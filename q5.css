@@ -1,0 +1,9 @@
+.answer_hit + span {
+  color: blue;
+  font-weight: bold;
+}
+
+.answer_unhit + span {
+  color: red;
+}
+
