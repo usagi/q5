@@ -56,7 +56,7 @@ var q5 = function(){
         gameover.innerHTML = 'Game Clear!!; (Press &lt;R&gt; to restart!)';
         p.appendChild(gameover);
         var score = document.createElement('p');
-        score.innerHTML = 'スコア: ' + (100 * this.tmp.pass / this.tmp.miss).toFixed(2) + ' (=正解率)';
+        score.innerHTML = 'スコア: ' + (100 * this.tmp.pass / (this.tmp.pass + this.tmp.miss)).toFixed(2) + ' (=正解率)';
         p.appendChild(score);
         for(var c_key in this.tmp.miss_categories)
         {
