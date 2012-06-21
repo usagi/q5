@@ -173,7 +173,7 @@ var q5 = function(){
         var send = document.createElement('input');
         send.setAttribute('type','submit');
         var question = document.createElement('p');
-        question.innerHTML = c.q;
+        question.innerHTML = c.q.replace(/\n/g,'<br>');
         question.className = 'question'
         var category = document.createElement('p');
         category.innerHTML = '(category: ' + c.c + ')';
