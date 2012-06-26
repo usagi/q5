@@ -38,6 +38,8 @@ var q5 = function(){
       console.log('run_state begin');
       var p = document.getElementById('q5');
       switch(this.tmp.run_state){
+      case 100:
+        break;
       case 40:
         // game over
         var gameover = document.createElement('p');
@@ -49,6 +51,8 @@ var q5 = function(){
           missed.innerHTML = c_key + ': ' + this.tmp.miss_categories[c_key] + '回間違えた！'
           p.appendChild(missed);
         }
+        this.tmp.run_state = 100;
+        break;
       case 30:
         // game clear
         console.log('run_state clear');
@@ -56,7 +60,8 @@ var q5 = function(){
         gameover.innerHTML = 'Game Clear!!; (Press &lt;R&gt; to restart!)';
         p.appendChild(gameover);
         var score = document.createElement('p');
-        score.innerHTML = 'スコア: ' + (100 * this.tmp.pass / (this.tmp.pass + this.tmp.miss)).toFixed(2) + ' (=正解率)';
+        var score_value = (100 * this.tmp.pass / (this.tmp.pass + this.tmp.miss)).toFixed(2);
+        score.innerHTML = 'スコア: ' + score_value  + ' (=正解率[%])';
         p.appendChild(score);
         for(var c_key in this.tmp.miss_categories)
         {
@@ -64,6 +69,77 @@ var q5 = function(){
           missed.innerHTML = c_key + ': ' + this.tmp.miss_categories[c_key] + '回間違えた！'
           p.appendChild(missed);
         }
+        var user_data;
+        document.cookie
+          .split(';')
+          .map(
+            function(a)
+            { return a.trim().split('=');}
+          )
+          .forEach(
+            function(a)
+            {
+              if(a[0]==='user_data')
+                user_data = JSON.parse(unescape(a[1]));
+            }
+          );
+        if(!user_data)
+          user_data = {};
+        var mode_score = user_data[this.etc.play_mode];
+        if(!mode_score)
+          mode_score = [];
+        mode_score.unshift(
+          { score: score_value
+          , miss_categories: this.tmp.miss_categories
+          }
+        );
+        while(mode_score.length > 8)
+          mode_score.pop();
+        user_data[this.etc.play_mode] = mode_score;
+        document.cookie =
+          'user_data=' +
+          JSON.stringify(user_data) +
+          '; expires=' + 
+          new Date(
+            new Date().getFullYear()+10,
+            new Date().getMonth()+1
+          );
+        p.appendChild(document.createElement('hr'));
+        var total_info = document.createElement('p');
+        total_info.innerHTML = 'このモードにおける今回までの過去（最大16）問の総合成績';
+        var total_max = 0;
+        var total_average = 0;
+        var total_missed = {};
+        for(var key = 0; key < mode_score.length; ++key)
+        {
+          var data = mode_score[key];
+          var data_score = parseFloat(data['score']);
+          console.log(data);
+          total_max = Math.max(data_score,total_max);
+          total_average += data_score;
+          for(var key in data.miss_categories)
+          {
+            var value = data.miss_categories[key];
+            if(!total_missed[key])
+              total_missed[key] = value;
+            else
+              total_missed[key] += value;
+          }
+        }
+        total_average /= mode_score.length;
+        var score_t_max = document.createElement('p');
+        score_t_max.innerHTML = '最高スコア: ' + total_max.toFixed(2)  + ' (=正解率[%])';
+        p.appendChild(score_t_max);
+        var score_t_average = document.createElement('p');
+        score_t_average.innerHTML = '算術平均スコア: ' + total_average.toFixed(2)  + ' (=正解率[%])';
+        p.appendChild(score_t_average);
+        for(var c_key in total_missed)
+        {
+          var missed = document.createElement('p');
+          missed.innerHTML = c_key + ': ' + total_missed[c_key] + '回間違えた！'
+          p.appendChild(missed);
+        }
+        this.tmp.run_state = 100;
         break;
       case 20:
         // 答え合わせ
